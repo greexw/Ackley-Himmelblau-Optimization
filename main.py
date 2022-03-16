@@ -14,7 +14,7 @@ def surface_plot(x, y, z, function_name):
 
 def contour_plot(x, y, z, function_name):
     fig, ax = plt.subplots()
-    ax.contourf(x, y, z, cmap='turbo')
+    ax.contourf(x, y, z, 50, cmap='turbo')
     ax.set_xlabel("X")
     ax.set_ylabel("Y")
     ax.set_title(f'{function_name} contour plot')
