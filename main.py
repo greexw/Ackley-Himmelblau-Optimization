@@ -79,8 +79,8 @@ def hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, current_a
     else:
         arguments = current_arguments[:]
         print("-----------------------------------------------------------------------------")
-        print(f"Initial iteration no.{number_of_iterations} arguments: {current_arguments[0]}, "
-              f"{current_arguments[1]}. Function Value: {function(current_arguments)}")
+        print(f"Initial iteration no.{number_of_iterations} arguments x:{current_arguments[0]}, "
+              f"y:{current_arguments[1]}. Function Value: {function(current_arguments)}")
         number_of_iterations += 1  # increase number of iterations
         new_arguments = arguments[:]  # temporary variable for list of arguments
         print("Exploratory moves:")
@@ -95,11 +95,11 @@ def hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, current_a
             print(f"Function value for arguments x:{minus_arguments[0]} y:{minus_arguments[1]} = {function_value_minus}")
 
             # check that arguments are in given range and new value is lower than previous value
-            if check_arguments(plus_arguments, min_value, max_value) and check_arguments(minus_arguments, min_value, max_value):
-                if function_value_plus < function(arguments):
-                    new_arguments = plus_arguments[:]
-                if function_value_minus < function(arguments) and function_value_minus < function_value_plus:
-                    new_arguments = minus_arguments[:]
+            if function_value_plus < function(new_arguments) and check_arguments(plus_arguments, min_value, max_value):
+                new_arguments = plus_arguments[:]
+            if function_value_minus < function(new_arguments) and function_value_minus < function_value_plus and\
+                    check_arguments(minus_arguments, min_value, max_value):
+                new_arguments = minus_arguments[:]
 
         # if arguments are the same like previously - decrease step and run function again with new step
         if new_arguments == arguments:
@@ -113,15 +113,20 @@ def hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, current_a
         print("-----------------------------------------------------------------------------")
         print("Pattern moves:")
         while True:
-            working_step_arguments = [new_arguments[1]+working_step[1], new_arguments[1]+working_step[1]]  # Make pattern move
+            working_step_arguments = [new_arguments[0]+working_step[0], new_arguments[1]+working_step[1]]  # Make pattern move
             function_value_after_ws = function(working_step_arguments)  # calculate function value after pattern move
-            print(f"Function arguments after Working Step: x:{working_step_arguments[0]}, y:{working_step_arguments[1]} = {function_value_after_ws}")
+            # print(f"Function arguments before Working Step: x:{new_arguments[0]}, y:{new_arguments[1]} = {function(new_arguments)}")
+            # print(f"Function arguments after Working Step: x:{working_step_arguments[0]}, y:{working_step_arguments[1]} = {function_value_after_ws}")
             if function(new_arguments) <= function_value_after_ws:  # if value after pattern move is not lower - break the loop
                 print("Working step failed! Function value is higher or equal")
                 break
             else:  # if value after pattern move is lower - make next pattern move
-                print(f"Working step passed. Function value is lower")
-                new_arguments = working_step_arguments[:]
+                if check_arguments(working_step_arguments, min_value, max_value):
+                    print(f"Working step passed. Function value is lower")
+                    new_arguments = working_step_arguments[:]
+                else:
+                    print("Working step failed. Arguments are not in given range")
+                    break
         # make next exploratory search after move:
         hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, new_arguments, function, number_of_iterations, min_value, max_value, number_of_iterations-1)
 
@@ -148,7 +153,7 @@ def app_menu():
         elif choice == '5':
             hooke_jeeves(10, 0.01, 2, random.sample(range(-5, 5), 2), random.sample(range(-5, 5), 2), himmelblau_calculator, 1, -5, 5)
         elif choice == '6':
-            hooke_jeeves(70, 0.01, 2, random.sample(range(-35, 35), 2), random.sample(range(-35, 35), 2), ackley_calculator, 1, -35, 35)
+            hooke_jeeves(70, 0.01, 1.01, random.sample(range(-35, 35), 2), random.sample(range(-35, 35), 2), ackley_calculator, 1, -35, 35)
         else:
             break
 
