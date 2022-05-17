@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+from math import sin
 
 
 def surface_plot(x, y, z, function_name):
@@ -131,6 +132,49 @@ def hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, current_a
         hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, new_arguments, function, number_of_iterations, min_value, max_value, number_of_iterations-1)
 
 
+def gradient(arguments, function):
+    dx = 0.00001  # small number
+    # gradient calculation using centered difference quotient
+    gradient_values = np.array([
+        (function([arguments[0] + dx, arguments[1]]) - function([arguments[0] - dx, arguments[1]])) / (2 * dx),
+        (function([arguments[0], arguments[1] + dx]) - function([arguments[0], arguments[1] - dx])) / (2 * dx)])
+    return gradient_values
+
+
+def gradient_descent(function, arguments, step, step_decrease_ratio, precision, max_iterations):
+    iteration_number = 1  # for first iteration
+    initial_arguments = arguments  # store initial arguments
+
+    while iteration_number < max_iterations:  # stop the loop after reaching maximal number of iterations
+        previous_arguments = arguments  # store arguments from previous iteration
+        gradient_values = gradient(arguments, function)  # calculate gradient values for arguments
+        new_arguments = arguments - (gradient_values * step)  # calculate new arguments using gradient values and step
+        if 5 > new_arguments[0] > -5 and 5 > new_arguments[1] > -5:
+            arguments = new_arguments
+        else:
+            print("Arguments are not in given range")
+        print("-----------------------------------------------------------------------------")
+        print(f"Iteration no {iteration_number}")
+        print("-----------------------------------------------------------------------------")
+        print(f"Starting arguments: x: {previous_arguments[0]}, y: {previous_arguments[1]} = {function(previous_arguments)}")
+        print(f"Gradient values: x: {gradient_values[0]}, y: {gradient_values[1]}")
+        print(f"Arguments after step: x: {arguments[0]}, y: {arguments[1]} = {function(arguments)}")
+        print(f"Current step value: {step}")
+
+        # end of gradient descent algorithm condition - if difference between function value for previous arguments and
+        # for current arguments is smaller than precision -> break the loop and end algorithm execution
+        if abs(function(arguments) - function(previous_arguments)) < precision:
+            break
+        else:
+            iteration_number += 1  # increase number of iteration
+            step *= step_decrease_ratio  # decrease the step by the step decrease ratio
+
+    print(f"Total iterations: {iteration_number}")
+    print(f"Initial arguments x:{initial_arguments[0]}, y:{initial_arguments[1]} = {function(initial_arguments)}")
+    print(f"Current arguments x:{arguments[0]}, y:{arguments[1]} = {function(arguments)}")
+    print(f"The result is better of: {function(initial_arguments) - function(arguments)}")
+
+
 def app_menu():
     while True:
         print("MENU")
@@ -140,6 +184,8 @@ def app_menu():
         print("4. Calculate Ackley function")
         print("5. Hooke-Jeeves - Himmelblau optimization")
         print("6. Hooke-Jeeves - Ackley optimization")
+        print("7. Gradient - Himmelblau optimization")
+        print("8. Gradient - Ackley optimization")
         choice = input("Your choice: ")
 
         if choice == '1':
@@ -151,9 +197,19 @@ def app_menu():
         elif choice == '4':
             print(ackley_calculator([0, 0]))
         elif choice == '5':
-            hooke_jeeves(10, 0.01, 2, random.sample(range(-5, 5), 2), random.sample(range(-5, 5), 2), himmelblau_calculator, 1, -5, 5)
+            data = random.sample(range(-5, 5), 2)
+        # step, minimal step, step decrease, arguments,function, iteration number, min value of arg, max value of arg
+            hooke_jeeves(10, 0.01, 2, data, data, himmelblau_calculator, 1, -5, 5)
         elif choice == '6':
-            hooke_jeeves(70, 0.01, 1.25, random.sample(range(-35, 35), 2), random.sample(range(-35, 35), 2), ackley_calculator, 1, -35, 35)
+            data = random.sample(range(-35, 35), 2)
+        # step, minimal step, step decrease, arguments,function, iteration number, min value of arg, max value of arg
+            hooke_jeeves(70, 0.01, 1.25, data, data, ackley_calculator, 1, -35, 35)
+        elif choice == '7':
+            #                  function, arguments, starting step, step decrease ratio, precision, max iterations
+            gradient_descent(himmelblau_calculator, np.array([4, 4]), 0.001, 0.98, 0.001, 600)
+        elif choice == '8':
+            #                  function, arguments, starting step, step decrease ratio, precision, max iterations
+            gradient_descent(ackley_calculator, np.array([random.sample(range(-35, 35), 2)]), 1000, 0.995, 0.0001, 5000)
         else:
             break
 
