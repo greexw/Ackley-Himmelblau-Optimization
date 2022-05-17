@@ -141,18 +141,23 @@ def gradient(arguments, function):
     return gradient_values
 
 
-def gradient_descent(function, arguments, step, step_decrease_ratio, precision, max_iterations):
+def gradient_descent(function, arguments, step, step_decrease_ratio, precision, max_iterations, min_value, max_value):
     iteration_number = 1  # for first iteration
-    initial_arguments = arguments  # store initial arguments
+    initial_arguments = arguments.copy()  # store initial arguments
 
     while iteration_number < max_iterations:  # stop the loop after reaching maximal number of iterations
-        previous_arguments = arguments  # store arguments from previous iteration
+        previous_arguments = arguments.copy()  # store arguments from previous iteration
         gradient_values = gradient(arguments, function)  # calculate gradient values for arguments
         new_arguments = arguments - (gradient_values * step)  # calculate new arguments using gradient values and step
-        if 5 > new_arguments[0] > -5 and 5 > new_arguments[1] > -5:
-            arguments = new_arguments
+        # check that new arguments are in given range:
+        if max_value > new_arguments[0] > min_value or max_value > new_arguments[1] > min_value:
+            if max_value > new_arguments[0] > min_value:
+                arguments[0] = new_arguments[0]
+            if max_value > new_arguments[1] > min_value:
+                arguments[1] = new_arguments[1]
         else:
             print("Arguments are not in given range")
+
         print("-----------------------------------------------------------------------------")
         print(f"Iteration no {iteration_number}")
         print("-----------------------------------------------------------------------------")
@@ -163,16 +168,20 @@ def gradient_descent(function, arguments, step, step_decrease_ratio, precision, 
 
         # end of gradient descent algorithm condition - if difference between function value for previous arguments and
         # for current arguments is smaller than precision -> break the loop and end algorithm execution
-        if abs(function(arguments) - function(previous_arguments)) < precision:
+        if abs(function(arguments) - function(previous_arguments)) < precision and arguments[0] == new_arguments[0] \
+                and arguments[1] == new_arguments[1]:
+            print("Difference between function value for previous and for current arguments is smaller than precision")
             break
         else:
             iteration_number += 1  # increase number of iteration
             step *= step_decrease_ratio  # decrease the step by the step decrease ratio
 
+    print("------------------------------END---------------------------------------------")
     print(f"Total iterations: {iteration_number}")
     print(f"Initial arguments x:{initial_arguments[0]}, y:{initial_arguments[1]} = {function(initial_arguments)}")
     print(f"Current arguments x:{arguments[0]}, y:{arguments[1]} = {function(arguments)}")
     print(f"The result is better of: {function(initial_arguments) - function(arguments)}")
+    print("-----------------------------------------------------------------------------")
 
 
 def app_menu():
@@ -205,11 +214,11 @@ def app_menu():
         # step, minimal step, step decrease, arguments,function, iteration number, min value of arg, max value of arg
             hooke_jeeves(70, 0.01, 1.25, data, data, ackley_calculator, 1, -35, 35)
         elif choice == '7':
-            #                  function, arguments, starting step, step decrease ratio, precision, max iterations
-            gradient_descent(himmelblau_calculator, np.array([4, 4]), 0.001, 0.98, 0.001, 600)
+            #                  function, arguments, starting step, step decrease ratio, precision, max iterations, min value of arg, max value of arg
+            gradient_descent(himmelblau_calculator, np.array([4.0, 4.0]), 0.001, 0.98, 0.001, 600, -5, 5)
         elif choice == '8':
-            #                  function, arguments, starting step, step decrease ratio, precision, max iterations
-            gradient_descent(ackley_calculator, np.array([random.sample(range(-35, 35), 2)]), 1000, 0.995, 0.0001, 5000)
+            #                  function, arguments, starting step, step decrease ratio, precision, max iterations, min value of arg, max value of arg
+            gradient_descent(ackley_calculator, np.array([-10.0, 20.0]), 100, 0.8, 0.001, 5000, -35, 35)
         else:
             break
 
