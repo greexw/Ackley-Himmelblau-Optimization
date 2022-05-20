@@ -1,7 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
-from math import sin
+import numdifftools as nd
+
 
 
 def surface_plot(x, y, z, function_name):
@@ -36,7 +37,7 @@ def ackley_plot():
     x = np.arange(-35, 35, 0.1)
     y = np.arange(-35, 35, 0.1)
     x, y = np.meshgrid(x, y)
-    result = -20.0 * np.exp(-0.2 * np.sqrt(0.5 * (x**2 + y**2)))-np.exp(0.5 * (np.cos(2 * np.pi * x) +
+    result = -20.0 * np.exp(-0.02 * np.sqrt(0.5 * (x**2 + y**2)))-np.exp(0.5 * (np.cos(2 * np.pi * x) +
                                                                                np.cos(2 * np.pi * y))) + np.e + 20
     surface_plot(x, y, result, 'Ackley')
     contour_plot(x, y, result, 'Ackley')
@@ -133,7 +134,7 @@ def hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, current_a
 
 
 def gradient(arguments, function):
-    dx = 0.00001  # small number
+    dx = 0.0001  # small number
     # gradient calculation using centered difference quotient
     gradient_values = np.array([
         (function([arguments[0] + dx, arguments[1]]) - function([arguments[0] - dx, arguments[1]])) / (2 * dx),
@@ -214,11 +215,15 @@ def app_menu():
         # step, minimal step, step decrease, arguments,function, iteration number, min value of arg, max value of arg
             hooke_jeeves(70, 0.01, 1.25, data, data, ackley_calculator, 1, -35, 35)
         elif choice == '7':
+            random_data = random.sample(range(-5, 5), 2)
+            data = [float(i) for i in random_data]
             #                  function, arguments, starting step, step decrease ratio, precision, max iterations, min value of arg, max value of arg
-            gradient_descent(himmelblau_calculator, np.array([4.0, 4.0]), 0.001, 0.98, 0.001, 600, -5, 5)
+            gradient_descent(himmelblau_calculator, np.array(data), 0.01, 0.98, 0.001, 600, -5, 5)
         elif choice == '8':
+            random_data = random.sample(range(-35, 35), 2)
+            data = [float(i) for i in random_data]
             #                  function, arguments, starting step, step decrease ratio, precision, max iterations, min value of arg, max value of arg
-            gradient_descent(ackley_calculator, np.array([-10.0, 20.0]), 100, 0.8, 0.001, 5000, -35, 35)
+            gradient_descent(ackley_calculator, np.array(data), 100, 0.8, 0.001, 5000, -35, 35)
         else:
             break
 
