@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import random
+import datetime
 import numdifftools as nd
-
 
 
 def surface_plot(x, y, z, function_name):
@@ -37,7 +37,7 @@ def ackley_plot():
     x = np.arange(-35, 35, 0.1)
     y = np.arange(-35, 35, 0.1)
     x, y = np.meshgrid(x, y)
-    result = -20.0 * np.exp(-0.02 * np.sqrt(0.5 * (x**2 + y**2)))-np.exp(0.5 * (np.cos(2 * np.pi * x) +
+    result = -20.0 * np.exp(-0.2 * np.sqrt(0.5 * (x**2 + y**2)))-np.exp(0.5 * (np.cos(2 * np.pi * x) +
                                                                                np.cos(2 * np.pi * y))) + np.e + 20
     surface_plot(x, y, result, 'Ackley')
     contour_plot(x, y, result, 'Ackley')
@@ -66,9 +66,10 @@ def check_arguments(arguments, min_value, max_value):  # check that arguments ar
     return check_status
 
 
-def hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, current_arguments, function, number_of_iterations, min_value, max_value, no_min_found_iteration=1):
+def hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, current_arguments, function, number_of_iterations, min_value, max_value, time_before_algorithm, no_min_found_iteration=1):
 
     if step < minimal_step:  # if current step lower than minimal_step - stop of algorithm loop
+        duration = datetime.datetime.now() - time_before_algorithm
         print("--------------------------------------------------------")
         print("Step value is lower than minimal step")
         print(f"Total iterations: {number_of_iterations}")
@@ -76,6 +77,8 @@ def hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, current_a
         print(f"Initial arguments x:{initial_arguments[0]}, y:{initial_arguments[1]} = {function(initial_arguments)}")
         print(f"Current arguments x:{current_arguments[0]}, y:{current_arguments[1]} = {function(current_arguments)}")
         print(f"The result is better of: {function(initial_arguments)-function(current_arguments)}")
+        print("--------------------------------------------------------")
+        print(f"Algorithm duration: {duration.seconds}s {duration.microseconds / 1000}ms")
         app_menu()
 
     else:
@@ -107,7 +110,7 @@ def hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, current_a
         if new_arguments == arguments:
             step /= step_decrease
             print(f"No better result in the given range. New step: {step}")
-            hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, arguments, function, number_of_iterations, min_value, max_value, no_min_found_iteration)
+            hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, arguments, function, number_of_iterations, min_value, max_value, time_before_algorithm, no_min_found_iteration)
 
         working_step = []
         for i in range(2):
@@ -130,7 +133,7 @@ def hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, current_a
                     print("Working step failed. Arguments are not in given range")
                     break
         # make next exploratory search after move:
-        hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, new_arguments, function, number_of_iterations, min_value, max_value, number_of_iterations-1)
+        hooke_jeeves(step, minimal_step, step_decrease, initial_arguments, new_arguments, function, number_of_iterations, min_value, max_value, time_before_algorithm, number_of_iterations-1)
 
 
 def gradient(arguments, function):
@@ -203,28 +206,41 @@ def app_menu():
         elif choice == '2':
             ackley_plot()
         elif choice == '3':
-            print(himmelblau_calculator([3, 2]))
+            x = input("First argument: ")
+            y = input("Second argument: ")
+            print(himmelblau_calculator([int(x), int(y)]))
         elif choice == '4':
-            print(ackley_calculator([0, 0]))
+            x = input("First argument: ")
+            y = input("Second argument: ")
+            print(ackley_calculator([int(x), int(y)]))
         elif choice == '5':
             data = random.sample(range(-5, 5), 2)
         # step, minimal step, step decrease, arguments,function, iteration number, min value of arg, max value of arg
-            hooke_jeeves(10, 0.01, 2, data, data, himmelblau_calculator, 1, -5, 5)
+            hooke_jeeves(10, 0.01, 2, data, data, himmelblau_calculator, 1, -5, 5, datetime.datetime.now(), 1)
         elif choice == '6':
             data = random.sample(range(-35, 35), 2)
         # step, minimal step, step decrease, arguments,function, iteration number, min value of arg, max value of arg
-            hooke_jeeves(70, 0.01, 1.25, data, data, ackley_calculator, 1, -35, 35)
+            hooke_jeeves(70, 0.01, 1.25, data, data, ackley_calculator, 1, -35, 35, datetime.datetime.now(), 1)
         elif choice == '7':
             random_data = random.sample(range(-5, 5), 2)
             data = [float(i) for i in random_data]
+            time_before_algorithm = datetime.datetime.now()
             #                  function, arguments, starting step, step decrease ratio, precision, max iterations, min value of arg, max value of arg
             gradient_descent(himmelblau_calculator, np.array(data), 0.01, 0.98, 0.001, 600, -5, 5)
+            duration = datetime.datetime.now() - time_before_algorithm
+            print(f"Algorithm duration: {duration.seconds}s {duration.microseconds / 1000}ms")
         elif choice == '8':
             random_data = random.sample(range(-35, 35), 2)
             data = [float(i) for i in random_data]
+            time_before_algorithm = datetime.datetime.now()
             #                  function, arguments, starting step, step decrease ratio, precision, max iterations, min value of arg, max value of arg
-            gradient_descent(ackley_calculator, np.array(data), 100, 0.8, 0.001, 5000, -35, 35)
+            gradient_descent(ackley_calculator, np.array(data), 2, 0.98, 0.001, 5000, -35, 35)
+            duration = datetime.datetime.now() - time_before_algorithm
+            print(f"Algorithm duration: {duration.seconds}s {duration.microseconds / 1000}ms")
         else:
+            print(gradient([1, 1], ackley_calculator))
+            grad = nd.Gradient(ackley_calculator)([1, 1])
+            print("Gradient by numdifftools is ", grad)
             break
 
 
