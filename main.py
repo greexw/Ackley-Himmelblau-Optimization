@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 import datetime
-import numdifftools as nd
 
 
 def surface_plot(x, y, z, function_name):
@@ -199,6 +198,7 @@ def app_menu():
         print("6. Hooke-Jeeves - Ackley optimization")
         print("7. Gradient - Himmelblau optimization")
         print("8. Gradient - Ackley optimization")
+        print("9. Exit")
         choice = input("Your choice: ")
 
         if choice == '1':
@@ -216,11 +216,11 @@ def app_menu():
         elif choice == '5':
             data = random.sample(range(-5, 5), 2)
         # step, minimal step, step decrease, arguments,function, iteration number, min value of arg, max value of arg
-            hooke_jeeves(10, 0.01, 2, data, data, himmelblau_calculator, 1, -5, 5, datetime.datetime.now(), 1)
+            hooke_jeeves(2, 0.01, 2, data, data, himmelblau_calculator, 1, -5, 5, datetime.datetime.now(), 1)
         elif choice == '6':
             data = random.sample(range(-35, 35), 2)
         # step, minimal step, step decrease, arguments,function, iteration number, min value of arg, max value of arg
-            hooke_jeeves(70, 0.01, 1.25, data, data, ackley_calculator, 1, -35, 35, datetime.datetime.now(), 1)
+            hooke_jeeves(50, 0.01, 2, data, data, ackley_calculator, 1, -35, 35, datetime.datetime.now(), 1)
         elif choice == '7':
             random_data = random.sample(range(-5, 5), 2)
             data = [float(i) for i in random_data]
@@ -230,18 +230,17 @@ def app_menu():
             duration = datetime.datetime.now() - time_before_algorithm
             print(f"Algorithm duration: {duration.seconds}s {duration.microseconds / 1000}ms")
         elif choice == '8':
-            random_data = random.sample(range(-35, 35), 2)
+            random_data = random.sample(range(-10, 10), 2)
             data = [float(i) for i in random_data]
             time_before_algorithm = datetime.datetime.now()
             #                  function, arguments, starting step, step decrease ratio, precision, max iterations, min value of arg, max value of arg
-            gradient_descent(ackley_calculator, np.array(data), 2, 0.98, 0.001, 5000, -35, 35)
+            gradient_descent(ackley_calculator, np.array(data), 0.001, 0.99, 0.001, 5000, -35, 35)
             duration = datetime.datetime.now() - time_before_algorithm
             print(f"Algorithm duration: {duration.seconds}s {duration.microseconds / 1000}ms")
-        else:
-            print(gradient([1, 1], ackley_calculator))
-            grad = nd.Gradient(ackley_calculator)([1, 1])
-            print("Gradient by numdifftools is ", grad)
+        elif choice == '9':
             break
+        else:
+            continue
 
 
 app_menu()
